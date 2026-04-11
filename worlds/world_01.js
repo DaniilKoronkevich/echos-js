@@ -2321,16 +2321,18 @@ export class WorldOne extends WorldBase {
         // ── Bubble I: desert video ──
         const b1e = this._bubbleSpatials[1];
         const el  = b1e && b1e.insideEl;
-        // Keep-alive: Chrome may pause offscreen video — restart + resume RVFC loop
-        if (el && el.paused && !el._playPending && !el.ended) {
-          el._playPending = true;
-          el.play().then(() => {
-            el._playPending = false;
-            // Re-arm RVFC after unpausing
-            if (typeof el.requestVideoFrameCallback === 'function') {
-              this._startDesertRVFC(el);
-            }
-          }).catch(() => { el._playPending = false; });
+        // Keep-alive: resume if paused or stalled (buffering on GitHub Pages CDN)
+        if (el && !el._playPending && !el.ended) {
+          const needsResume = el.paused || el.readyState < 3; // <3 = not enough data
+          if (needsResume) {
+            el._playPending = true;
+            el.play().then(() => {
+              el._playPending = false;
+              if (typeof el.requestVideoFrameCallback === 'function') {
+                this._startDesertRVFC(el);
+              }
+            }).catch(() => { el._playPending = false; });
+          }
         }
         // Draw from offscreen canvas (CPU-side, full-res) — never from el directly.
         // el._offscreen is updated each RVFC tick at native video resolution.
