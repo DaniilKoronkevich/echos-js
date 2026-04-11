@@ -6,8 +6,10 @@
 //     → large files don't re-download on every visit
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE      = 'cosmos-media-v1';
-const MEDIA_EXTS = ['.mp4', '.ogg', '.opus', '.jpg', '.png', '.webm', '.gif'];
+const CACHE      = 'cosmos-media-v2';
+// Аудио (.opus/.ogg/.m4a) НЕ кэшируем — браузер стримит их с Range requests (206),
+// SW-кэш не совместим с range requests и вызывает обрывы звука.
+const MEDIA_EXTS = ['.mp4', '.jpg', '.png', '.webm', '.gif'];
 
 // Activate immediately — no waiting for old tabs to close
 self.addEventListener('install',  () => self.skipWaiting());
