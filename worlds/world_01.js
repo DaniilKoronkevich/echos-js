@@ -6,6 +6,19 @@
 
 import { WorldBase } from './WorldBase.js';
 
+// ─── Audio format detection (iOS Safari: no opus/ogg → use m4a) ──────────────
+const _a = document.createElement('audio');
+const _canOpus = _a.canPlayType('audio/ogg; codecs=opus') !== '' ||
+                 _a.canPlayType('audio/opus') !== '';
+const _canOgg  = _a.canPlayType('audio/ogg; codecs=vorbis') !== '';
+
+// Returns the best available path for a given audio file
+function _audio(path) {
+  if (path.endsWith('.opus') && !_canOpus) return path.replace(/\.opus$/, '.m4a');
+  if (path.endsWith('.ogg')  && !_canOgg)  return path.replace(/\.ogg$/,  '.m4a');
+  return path;
+}
+
 // ─── Fires audio files (hardcoded — was manifest.json read via sync XHR) ──────
 //  Sync XHR is deprecated. Since the list is static, hardcoding removes the
 //  deprecated API entirely with no behaviour change.
@@ -23,7 +36,7 @@ const _firesFiles = [
   './sources/audio/fires/fire_11_australian_3.opus',
   './sources/audio/fires/fire_12_saami_7.opus',
   './sources/audio/fires/fire_13_australian_1.opus',
-];
+].map(_audio);
 
 // ─── Lore texts (shown near rune marks) ──────────────────────────────────────
 const LORE_TEXTS = [
@@ -78,34 +91,30 @@ export class WorldOne extends WorldBase {
     return {
       width:         4200,
       height:        3000,
-      ambient:       './sources/audio/ambient/first_level_loop_1.ogg',
+      ambient:       _audio('./sources/audio/ambient/first_level_loop_1.ogg'),
       groundTexture: './sources/photo/stone_texture.jpg',
 
       bubbles: [
         { id: 1, name: 'echo_of_the_desert',   wx: 300,  wy: 300,  r: 72, num: 'I',   ph: 0.0,
-          // desert_pre: dry direct approach sound — no spatial processing
-          approach:      './sources/audio/bubbles/desert_pre.opus',
+          approach:      _audio('./sources/audio/bubbles/desert_pre.opus'),
           inside:        './sources/video/desert.mp4',
           insideType:    'video',
           interiorVideo: './sources/video/desert.mp4',
           interiorMode:  'fullscreen',
-          // ghost: plays quietly after first visit — loop at low level
-          ghost:         './sources/audio/bubbles/ghost_desert_1.opus' },
+          ghost:         _audio('./sources/audio/bubbles/ghost_desert_1.opus') },
         { id: 2, name: 'echo_of_the_kalevala', wx: 3900, wy: 300,  r: 72, num: 'II',  ph: 2.09,
-          // kalevala_pre: direct approach — no room reverb (same as desert)
-          approach:      './sources/audio/bubbles/kalevala_pre.opus',
-          inside:        './sources/audio/bubbles/kalevala_bouble_2.opus',
+          approach:      _audio('./sources/audio/bubbles/kalevala_pre.opus'),
+          inside:        _audio('./sources/audio/bubbles/kalevala_bouble_2.opus'),
           insideType:    'audio',
           interiorVideo: './sources/video/kalevala_texture.mp4',
           interiorMode:  'floor',
-          // ghost: lingers after first visit
-          ghost:         './sources/audio/bubbles/kalevala_ghost_2.opus' },
+          ghost:         _audio('./sources/audio/bubbles/kalevala_ghost_2.opus') },
         { id: 3, name: 'digital_echo', wx: 2100, wy: 2700, r: 72, num: 'III', ph: 4.19,
-          approach:      './sources/audio/bubbles/delay_pre.opus',
-          inside:        './sources/audio/bubbles/delay_in.opus',
+          approach:      _audio('./sources/audio/bubbles/delay_pre.opus'),
+          inside:        _audio('./sources/audio/bubbles/delay_in.opus'),
           insideType:    'audio',
           interiorMode:  'genesis',
-          ghost:         './sources/audio/bubbles/delay_ghost_stereo.opus' },
+          ghost:         _audio('./sources/audio/bubbles/delay_ghost_stereo.opus') },
       ],
 
       research: _firesFiles,
@@ -223,7 +232,7 @@ export class WorldOne extends WorldBase {
     // ── Player ──
     this.P = {
       x: R.WW / 2, y: R.WH / 2,
-      w: 46, h: 60, speed: 1.5 * (R.CW / 960),
+      w: 46, h: 60, speed: 3.0,
       vx: 0, vy: 0, walk: 0,
       moving: false, facing: 1,
     };
