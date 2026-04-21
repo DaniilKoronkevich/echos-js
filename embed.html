@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ECHOS — embed</title>
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { background:#000; width:100%; height:100%; overflow:hidden; touch-action:none; }
+    #c { display:block; cursor:none; width:100vw; height:100vh; position:relative; z-index:1; }
+    #overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.95);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      color:rgba(255,255,255,0.85);
+      font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+      z-index:10; user-select:none; cursor:pointer;
+    }
+    #overlay h2 {
+      font-size:13px; font-weight:300; letter-spacing:0.42em;
+      margin-bottom:18px; opacity:0.65;
+    }
+    #overlay p { font-size:9px; letter-spacing:0.22em; opacity:0.32; }
+    #progress-bar-track {
+      width:120px; height:1px; background:rgba(255,255,255,0.12);
+      margin:14px 0 0;
+    }
+    #progress-bar-fill {
+      height:100%; width:0%; background:rgba(255,255,255,0.42);
+      transition:width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div id="overlay">
+  <h2>E C H O S</h2>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <p style="margin-top:14px;">touch to begin</p>
+</div>
+
+<canvas id="c"></canvas>
+
+<script type="module">
+import { Engine }        from './engine/Engine.js';
+import { WorldOne }      from './worlds/world_01.js';
+import { TouchControls } from './engine/TouchControls.js';
+import { Heatmap }       from './engine/Heatmap.js';
+
+// Check for URL param ?world=1|2|3 — teleport on start
+const startBubble = new URLSearchParams(location.search).get('world');
+
+await new Promise(resolve => {
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js';
+  s.onload = resolve; s.onerror = resolve;
+  document.head.appendChild(s);
+});
+
+window._COSMOS_VOL    = { world: 0.38, fires: 0.48, bubbles: 0.65 };
+const world           = new WorldOne();
+const engine          = new Engine('c');
+engine.loadWorld(world);
+window._heatmap       = new Heatmap();
+window._touchControls = new TouchControls();
+window._input         = engine.input;
+
+// Progress bar
+const fill = document.getElementById('progress-bar-fill');
+setTimeout(() => {
+  const els   = Array.from(document.querySelectorAll('audio, video'));
+  const total = els.length || 1;
+  const poll  = setInterval(() => {
+    const n   = els.filter(e => e.readyState >= 3 || e.error).length;
+    fill.style.width = Math.round(n / total * 100) + '%';
+    if (n >= total) clearInterval(poll);
+  }, 300);
+  setTimeout(() => clearInterval(poll), 6000);
+}, 100);
+
+let started = false;
+function startGame() {
+  if (started) return;
+  started = true;
+  document.getElementById('overlay').style.display = 'none';
+  engine.start();
+
+  // ?world= teleport
+  if (startBubble) {
+    const BUBBLE_POS = {
+      '1': { x: 300  / 4200, y: 300  / 3000 },
+      '2': { x: 3900 / 4200, y: 300  / 3000 },
+      '3': { x: 2140 / 4200, y: 2560 / 3000 },
+    };
+    const pos = BUBBLE_POS[startBubble];
+    if (pos) {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('echos:teleport', { detail: pos }));
+        setTimeout(() => engine.input._just.add('Enter'), 80);
+      }, 400);
+    }
+  }
+}
+document.getElementById('overlay').addEventListener('click',    startGame, { once: true });
+document.getElementById('overlay').addEventListener('touchend', startGame, { once: true });
+document.addEventListener('keydown', startGame, { once: true });
+</script>
+</body>
+</html>

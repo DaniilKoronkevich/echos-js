@@ -493,6 +493,8 @@ export class WorldOne extends WorldBase {
             const firstVisit = !this._visitedBubbles.has(b.id);
             this._visitedBubbles.add(b.id);
             if (firstVisit && b.ghost) this._startPersistentGhost(b, audio);
+            // Heatmap — bubble visit
+            if (window._heatmap) window._heatmap.recordBubble(b.id);
 
             // Reset media to start on each entry (loop=false for auto-exit bubbles)
             if (b.id === 1) {
@@ -562,6 +564,11 @@ export class WorldOne extends WorldBase {
       this._startGhost(audio);
     }
     this._wasInBubble = _nowIn;
+
+    // ── Heatmap position recording (every 60 frames ≈ 1s) ──
+    if (window._heatmap && t % 60 === 0 && !this._introActive) {
+      window._heatmap.record(P.x, P.y);
+    }
 
     // ── Audio ──
     this._updateAudio(audio);
@@ -1426,14 +1433,11 @@ export class WorldOne extends WorldBase {
     // Minimap
     this._drawMinimap(ctx, renderer);
 
-    // HUD — title only (no guide)
-    ctx.save();
-    ctx.font      = `300 11px -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif`;
-    ctx.fillStyle = 'rgba(255,255,255,0.30)';
-    ctx.textAlign = 'left';
-    ctx.fillText('cosmos', 18, CH - 16);
+    // Heatmap overlay (toggle H)
+    if (window._heatmap) window._heatmap.draw(ctx, renderer);
 
-    ctx.restore();
+    // Touch joystick
+    if (window._touchControls) window._touchControls.draw(this.engine?.input || window._input);
   }
 
   // ─── Draw helpers ──────────────────────────────────────────────────────────

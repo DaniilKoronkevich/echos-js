@@ -2,183 +2,111 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Open Graph -->
+  <meta property="og:title"       content="ECHOS">
+  <meta property="og:description" content="An atmospheric sound world. Walk, listen, explore.">
+  <meta property="og:type"        content="website">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>COSMOS</title>
+  <title>ECHOS</title>
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #000;
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
-      overflow: hidden;
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      background:#000; width:100%; height:100%;
+      overflow:hidden; touch-action:none;
     }
     #c {
-      display: block;
-      cursor: none;
-      position: relative;
-      z-index: 1;
-    }
-    #starfield { display: block; }
-    #overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.94);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.90);
-      font-family: 'Cinzel', 'Palatino Linotype', serif;
-      letter-spacing: 0.35em;
-      z-index: 10; user-select: none;
-    }
-    #overlay h1 {
-      font-size: 32px; font-weight: 700; margin-bottom: 28px;
-      letter-spacing: 0.50em;
-    }
-    #overlay p {
-      font-size: 11px; opacity: 0.55;
-      font-family: 'Cinzel', serif;
-      letter-spacing: 0.28em;
-    }
-    #overlay .controls {
-      position: relative;
-      margin-top: 36px;
-      display: flex; gap: 32px;
-      align-items: flex-start;
-    }
-    #overlay .ctrl-col {
-      display: flex; flex-direction: column; gap: 8px;
-      align-items: center;
-    }
-    #overlay .ctrl-row {
-      display: flex; gap: 10px; align-items: center;
-    }
-    #overlay .ctrl-key {
-      font-family: 'Cinzel', serif;
-      font-size: 8px; letter-spacing: 0.20em;
-      color: rgba(200,185,150,0.65);
-      border: 1px solid rgba(200,185,150,0.28);
-      padding: 3px 7px; min-width: 28px;
-      text-align: center;
-    }
-    #overlay .ctrl-desc {
-      font-family: 'Cinzel', serif;
-      font-size: 8px; letter-spacing: 0.22em;
-      color: rgba(200,185,150,0.38);
-      white-space: nowrap;
-    }
-    #overlay .ctrl-sep {
-      width: 1px; height: 56px;
-      background: rgba(200,185,150,0.12);
-      align-self: center;
+      display:block; cursor:none;
+      position:relative; z-index:1;
+      width:100vw; height:100vh;
     }
 
-    /* ── Volume mixer panel ── */
-    #vol-panel {
-      position: fixed;
-      bottom: 18px; right: 18px;
-      z-index: 20;
-      background: rgba(0,0,0,0.62);
-      border: 1px solid rgba(255,255,255,0.10);
-      padding: 10px 14px 12px;
-      display: flex; flex-direction: column; gap: 6px;
-      pointer-events: auto;
-      user-select: none;
-      backdrop-filter: blur(4px);
+    /* ── Overlay ── */
+    #overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.96);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      color:rgba(255,255,255,0.90);
+      font-family:'Cinzel','Palatino Linotype',serif;
+      letter-spacing:0.35em;
+      z-index:10; user-select:none;
     }
-    .vol-label {
-      font-family: 'Cinzel', serif;
-      font-size: 8px; letter-spacing: 0.30em;
-      color: rgba(200,190,170,0.65);
-      margin-bottom: 2px;
+    #overlay h1 {
+      font-size:clamp(20px,6vw,32px);
+      font-weight:700; letter-spacing:0.50em;
+      margin-bottom:24px;
     }
-    .vol-row {
-      display: flex; align-items: center; gap: 8px;
+    #overlay .subtitle {
+      font-size:clamp(9px,2.5vw,11px); opacity:0.45;
+      font-family:'Cinzel',serif; letter-spacing:0.28em;
+      margin-bottom:36px;
     }
-    .vol-row span {
-      font-family: 'Cinzel', serif;
-      font-size: 8px; letter-spacing: 0.25em;
-      color: rgba(200,190,170,0.55);
-      width: 46px;
+
+    /* ── Progress bar ── */
+    #progress-wrap {
+      width: clamp(160px, 38vw, 280px);
+      margin-bottom: 28px;
     }
-    .vol-row input[type=range] {
-      -webkit-appearance: none;
-      width: 88px; height: 2px;
-      background: rgba(200,190,170,0.22);
-      border-radius: 1px; outline: none; cursor: pointer;
+    #progress-bar-track {
+      width:100%; height:1px;
+      background:rgba(200,185,150,0.15);
+      position:relative; overflow:hidden;
     }
-    .vol-row input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: rgba(200,190,165,0.80);
-      cursor: pointer;
+    #progress-bar-fill {
+      height:100%; width:0%;
+      background:rgba(200,185,150,0.65);
+      transition:width 0.3s ease;
     }
-    .vol-row input[type=range]::-moz-range-thumb {
-      width: 10px; height: 10px;
-      border-radius: 50%; border: none;
-      background: rgba(200,190,165,0.80);
-      cursor: pointer;
+    #progress-label {
+      font-family:'Cinzel',serif;
+      font-size:8px; letter-spacing:0.28em;
+      color:rgba(200,185,150,0.38);
+      text-align:center; margin-top:8px;
     }
+
+    /* ── Begin button ── */
+    #begin-btn {
+      font-family:'Cinzel',serif;
+      font-size:clamp(9px,2.5vw,11px);
+      letter-spacing:0.28em;
+      color:rgba(200,185,150,0.55);
+      opacity:0; cursor:pointer;
+      transition:opacity 0.6s ease;
+      padding:10px 0;
+      background:none; border:none;
+    }
+    #begin-btn.ready { opacity:1; }
+
+    /* Starfield */
+    #starfield { display:block; }
   </style>
 </head>
 <body>
 
 <div id="overlay">
   <canvas id="starfield" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0.55;"></canvas>
-  <h1 style="position:relative;">C O S M O S</h1>
-  <p style="position:relative; margin-top:12px; cursor:pointer;">click to begin</p>
 
-  <div class="controls" style="position:relative;">
-    <div class="ctrl-col">
-      <div class="ctrl-row">
-        <span class="ctrl-key">W</span><span class="ctrl-desc">move</span>
-      </div>
-      <div class="ctrl-row">
-        <span class="ctrl-key">A</span>
-        <span class="ctrl-key">S</span>
-        <span class="ctrl-key">D</span>
-      </div>
-      <div class="ctrl-desc" style="margin-top:2px;">or  ↑ ← ↓ →</div>
-    </div>
+  <h1 style="position:relative;">E C H O S</h1>
+  <p class="subtitle" style="position:relative;">a sound world</p>
 
-    <div class="ctrl-sep"></div>
-
-    <div class="ctrl-col">
-      <div class="ctrl-row">
-        <span class="ctrl-key">ENTER</span>
-        <span class="ctrl-desc">enter bubble</span>
-      </div>
-      <div class="ctrl-row">
-        <span class="ctrl-key">ESC</span>
-        <span class="ctrl-desc">exit bubble</span>
-      </div>
-    </div>
+  <div id="progress-wrap" style="position:relative;">
+    <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+    <div id="progress-label">loading · 0%</div>
   </div>
+
+  <button id="begin-btn">touch or click to begin</button>
 </div>
 
 <canvas id="c"></canvas>
 
-<!-- Volume mixer — always visible, bottom-right corner -->
-<div id="vol-panel">
-  <div class="vol-label">M I X E R</div>
-  <div class="vol-row">
-    <span>WORLD</span>
-    <input type="range" id="vol-world"   min="0" max="100" value="38">
-  </div>
-  <div class="vol-row">
-    <span>FIRES</span>
-    <input type="range" id="vol-fires"   min="0" max="100" value="48">
-  </div>
-  <div class="vol-row">
-    <span>BUBBLES</span>
-    <input type="range" id="vol-bubbles" min="0" max="100" value="65">
-  </div>
-</div>
-
 <script>
-// Starfield animation on the overlay
+// ── Starfield ──────────────────────────────────────────────────────────────────
 (function () {
   const oc = document.getElementById('starfield');
   const resize = () => { oc.width = window.innerWidth; oc.height = window.innerHeight; };
@@ -192,8 +120,7 @@
     sp: 0.004 + Math.random() * 0.012,
   }));
   function tickStars() {
-    const ovl = document.getElementById('overlay');
-    if (!ovl || ovl.style.display === 'none') return;
+    if (!document.getElementById('overlay') || document.getElementById('overlay').style.display === 'none') return;
     ox.clearRect(0, 0, oc.width, oc.height);
     stars.forEach(s => {
       s.ph += s.sp;
@@ -205,61 +132,102 @@
   }
   tickStars();
 })();
-</script>
 
-<script>
-// Global volume object — read every frame by world audio update
+// ── Volume defaults (used by world audio) ─────────────────────────────────────
 window._COSMOS_VOL = { world: 0.38, fires: 0.48, bubbles: 0.65 };
-(function () {
-  const ids = ['world', 'fires', 'bubbles'];
-  ids.forEach(k => {
-    const el = document.getElementById('vol-' + k);
-    if (!el) return;
-    el.value = Math.round(window._COSMOS_VOL[k] * 100);
-    el.addEventListener('input', () => {
-      window._COSMOS_VOL[k] = el.value / 100;
-    });
-  });
-})();
 </script>
 
 <script type="module">
-import { Engine }   from './engine/Engine.js';
-import { WorldOne } from './worlds/world_01.js';
+import { Engine }        from './engine/Engine.js';
+import { WorldOne }      from './worlds/world_01.js';
+import { TouchControls } from './engine/TouchControls.js';
+import { Heatmap }       from './engine/Heatmap.js';
 
-// Try to load Resonance Audio async — if it fails, HRTF fallback kicks in
-const resSrc = 'https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js';
+// ── Resonance Audio (optional, fail silently) ──────────────────────────────────
 await new Promise(resolve => {
   const s = document.createElement('script');
-  s.src = resSrc;
-  s.onload = resolve;
-  s.onerror = resolve; // fail silently → HRTF fallback
+  s.src = 'https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js';
+  s.onload = resolve; s.onerror = resolve;
   document.head.appendChild(s);
 });
 
+// ── Build world + engine ───────────────────────────────────────────────────────
+const world  = new WorldOne();
 const engine = new Engine('c');
-engine.loadWorld(new WorldOne());
+engine.loadWorld(world);
 
-// Start on click or keydown — click is primary, keyboard also works
-const _startGame = () => {
+// ── Heatmap + TouchControls (global so world_01 can reach them) ────────────────
+window._heatmap       = new Heatmap();
+window._touchControls = new TouchControls();
+window._input         = engine.input;
+
+// ── Progress bar — track all media elements created by WorldBase ───────────────
+const bar   = document.getElementById('progress-bar-fill');
+const label = document.getElementById('progress-label');
+const btn   = document.getElementById('begin-btn');
+
+function watchProgress() {
+  // Collect all HTMLMediaElements in the document after world load
+  const els = Array.from(document.querySelectorAll('audio, video'));
+  if (els.length === 0) { finishProgress(); return; }
+
+  let loaded = 0;
+  const total = els.length;
+
+  const onReady = () => {
+    loaded = Math.min(total, els.filter(e =>
+      e.readyState >= 3 || e.error || e.networkState === 3
+    ).length);
+    const pct = Math.round(loaded / total * 100);
+    bar.style.width   = pct + '%';
+    label.textContent = `loading · ${pct}%`;
+    if (pct >= 100) finishProgress();
+  };
+
+  els.forEach(el => {
+    el.addEventListener('canplaythrough', onReady, { once: true });
+    el.addEventListener('error',          onReady, { once: true });
+  });
+
+  // Poll as fallback (some elements may already be ready)
+  const poll = setInterval(() => {
+    onReady();
+    if (loaded >= total) clearInterval(poll);
+  }, 400);
+
+  // Minimum load time so bar is visible even on fast connections
+  setTimeout(finishProgress, 1800);
+}
+
+function finishProgress() {
+  bar.style.width   = '100%';
+  label.textContent = 'ready';
+  btn.classList.add('ready');
+}
+
+// Give WorldBase time to create media elements, then watch
+setTimeout(watchProgress, 120);
+
+// ── Start on tap / click / keydown ────────────────────────────────────────────
+let started = false;
+function startGame() {
+  if (started) return;
+  started = true;
   const overlay = document.getElementById('overlay');
-  if (!overlay || overlay.style.display === 'none') return;
-  overlay.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
   engine.start();
-};
-document.getElementById('overlay').addEventListener('click', _startGame, { once: true });
-document.addEventListener('keydown', _startGame, { once: true });
+}
+
+document.getElementById('overlay').addEventListener('click',    startGame, { once: true });
+document.getElementById('overlay').addEventListener('touchend', startGame, { once: true });
+document.addEventListener('keydown', startGame, { once: true });
 </script>
 
 <script>
-// ── Service Worker: auto cache-bust on every deploy ──────────────────────────
+// ── Service Worker ─────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { scope: './' })
-    .then(reg => {
-      // Force SW to check for updates immediately (instead of waiting 24h)
-      reg.update();
-    })
-    .catch(() => {});
+    .then(reg => reg.update()).catch(() => {});
 }
 </script>
 </body>
